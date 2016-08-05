@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'SWCardViewController_Example' do
+  pod 'SWCardViewController', :path => '../'
+
+  target 'SWCardViewController_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
