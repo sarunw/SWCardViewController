@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import SWCardViewController
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, SWCardViewControllerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -20,5 +22,27 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "presentPopup" {
+            let cv = segue.destinationViewController as! SWCardViewController
+            
+            let storyboard = self.storyboard!
+            let a = storyboard.instantiateViewControllerWithIdentifier("A")
+            let b = storyboard.instantiateViewControllerWithIdentifier("B")
+            let aa = storyboard.instantiateViewControllerWithIdentifier("A")
+            let bb = storyboard.instantiateViewControllerWithIdentifier("B")
+            cv.view.backgroundColor = UIColor.clearColor()
+            cv.modalPresentationStyle = .OverCurrentContext
+            cv.setViewControllers([a, b, aa, bb], animated: false)
+            cv.cardSize = CGSize(width: 260, height: 400)
+            cv.delegate = self
+        }
+    }
+    
+    // MARK: - SWCardViewControllerDelegate
+    func cardViewControllerDidRemoveAllViewControllers(viewController: SWCardViewController) {
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
 }
 

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SWCardViewController
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        if
+            let rootViewController = window?.rootViewController as? SWCardViewController,
+            let storyboard = rootViewController.storyboard {
+            
+            let a = storyboard.instantiateViewControllerWithIdentifier("A")
+            let b = storyboard.instantiateViewControllerWithIdentifier("B")
+
+            rootViewController.setViewControllers([a, b], animated: false)
+        }
+        
         return true
     }
 

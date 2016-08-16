@@ -1,0 +1,16 @@
+PODS:
+  - SWCardViewController (0.1.0)
+
+DEPENDENCIES:
+  - SWCardViewController (from `../`)
+
+EXTERNAL SOURCES:
+  SWCardViewController:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  SWCardViewController: 8e511f2f7ac88164fa8ac13202378e7ae7d516b8
+
+PODFILE CHECKSUM: cd6595b60ee4ba1964c8caf29afef4b52959156c
+
+COCOAPODS: 1.0.1
