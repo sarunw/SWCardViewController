@@ -11,10 +11,10 @@ import UIKit
 class SWCardViewCollectionViewFlowLayout: UICollectionViewFlowLayout {
     
     
-    override func targetContentOffsetForProposedContentOffset(proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
     
         guard let collectionView = self.collectionView else {
-            return super.targetContentOffsetForProposedContentOffset(proposedContentOffset, withScrollingVelocity: velocity)
+            return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
         
         
@@ -22,13 +22,13 @@ class SWCardViewCollectionViewFlowLayout: UICollectionViewFlowLayout {
         let halfWidth = bounds.size.width * 0.5;
         let proposedContentOffsetCenterX = proposedContentOffset.x + halfWidth;
         
-        if let attributesForVisibleCells = layoutAttributesForElementsInRect(bounds) {
+        if let attributesForVisibleCells = layoutAttributesForElements(in: bounds) {
             
             var candidateAttributes : UICollectionViewLayoutAttributes?
             for attributes in attributesForVisibleCells {
                 
                 // == Skip comparison with non-cell items (headers and footers) == //
-                if attributes.representedElementCategory != UICollectionElementCategory.Cell {
+                if attributes.representedElementCategory != UICollectionElementCategory.cell {
                     continue
                 }
                 
@@ -55,7 +55,7 @@ class SWCardViewCollectionViewFlowLayout: UICollectionViewFlowLayout {
             
         }
         
-        return super.targetContentOffsetForProposedContentOffset(proposedContentOffset, withScrollingVelocity: velocity)
+        return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
     }
 //    override func finalLayoutAttributesForDisappearingItemAtIndexPath(itemIndexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
 //        let attributes = super.finalLayoutAttributesForDisappearingItemAtIndexPath(itemIndexPath)

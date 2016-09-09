@@ -21,7 +21,7 @@ class SWCardCollectionViewCell: UICollectionViewCell {
         
         contentView.clipsToBounds = false
         contentView.layer.shadowRadius = 5
-        contentView.layer.shadowColor = UIColor.blackColor().CGColor
+        contentView.layer.shadowColor = UIColor.black.cgColor
         contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
         contentView.layer.shadowOpacity = 0.3
         
@@ -33,6 +33,6 @@ class SWCardCollectionViewCell: UICollectionViewCell {
         super.layoutSubviews()
         
         let shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: 5)
-        contentView.layer.shadowPath = shadowPath.CGPath
+        contentView.layer.shadowPath = shadowPath.cgPath
     }
 }
