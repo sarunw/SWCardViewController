@@ -22,17 +22,17 @@ class ViewController: UIViewController, SWCardViewControllerDelegate {
         // Dispose of any resources that can be recreated.
     }
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "presentPopup" {
-            let cv = segue.destinationViewController as! SWCardViewController
+            let cv = segue.destination as! SWCardViewController
             
             let storyboard = self.storyboard!
-            let a = storyboard.instantiateViewControllerWithIdentifier("A")
-            let b = storyboard.instantiateViewControllerWithIdentifier("B")
-            let aa = storyboard.instantiateViewControllerWithIdentifier("A")
-            let bb = storyboard.instantiateViewControllerWithIdentifier("B")
-            cv.view.backgroundColor = UIColor.clearColor()
-            cv.modalPresentationStyle = .OverCurrentContext
+            let a = storyboard.instantiateViewController(withIdentifier: "A")
+            let b = storyboard.instantiateViewController(withIdentifier: "B")
+            let aa = storyboard.instantiateViewController(withIdentifier: "A")
+            let bb = storyboard.instantiateViewController(withIdentifier: "B")
+            cv.view.backgroundColor = UIColor.clear
+            cv.modalPresentationStyle = .overCurrentContext
             cv.setViewControllers([a, b, aa, bb], animated: false)
             cv.cardSize = CGSize(width: 260, height: 400)
             cv.delegate = self
@@ -40,8 +40,8 @@ class ViewController: UIViewController, SWCardViewControllerDelegate {
     }
     
     // MARK: - SWCardViewControllerDelegate
-    func cardViewControllerDidRemoveAllViewControllers(viewController: SWCardViewController) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    func cardViewControllerDidRemoveAllViewControllers(_ viewController: SWCardViewController) {
+        self.dismiss(animated: true, completion: nil)
     }
     
 }

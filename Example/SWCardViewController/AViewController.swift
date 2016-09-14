@@ -22,7 +22,7 @@ class AViewController: UIViewController {
     }
     
 
-    @IBAction func didTapCloseButton(sender: AnyObject) {
+    @IBAction func didTapCloseButton(_ sender: AnyObject) {
         cardViewController?.dismissViewController(self, animated: true)
     }
     

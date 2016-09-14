@@ -14,87 +14,87 @@ private let springDamping: CGFloat = 0.8
 private let animationDuration = 0.3
 
 private enum SwipeDirection: CGFloat {
-    case Up
-    case Down
-    case None
+    case up
+    case down
+    case none
     
     init(yVelocity: CGFloat) {
         if fabs(yVelocity) < 200 {
-            self.init(rawValue: None.rawValue)!
+            self.init(rawValue: SwipeDirection.none.rawValue)!
         } else if yVelocity > 0 {
-            self.init(rawValue: Down.rawValue)!
+            self.init(rawValue: SwipeDirection.down.rawValue)!
         } else {
-            self.init(rawValue: Up.rawValue)!
+            self.init(rawValue: SwipeDirection.up.rawValue)!
         }
     }
 }
 
 @objc
 public protocol SWCardViewControllerDelegate: class {
-    optional func cardViewController(_ viewController: SWCardViewController, willShowViewControllers viewControllers: [UIViewController], animated: Bool)
-    optional func cardViewController(_ viewController: SWCardViewController, didShowViewControllers viewControllers: [UIViewController], animated: Bool)
-    optional func cardViewControllerDidRemoveAllViewControllers(_ viewController: SWCardViewController)
-    optional func cardViewControllerDidTapDismiss(_ viewController: SWCardViewController)
+    @objc optional func cardViewController(_ viewController: SWCardViewController, willShowViewControllers viewControllers: [UIViewController], animated: Bool)
+    @objc optional func cardViewController(_ viewController: SWCardViewController, didShowViewControllers viewControllers: [UIViewController], animated: Bool)
+    @objc optional func cardViewControllerDidRemoveAllViewControllers(_ viewController: SWCardViewController)
+    @objc optional func cardViewControllerDidTapDismiss(_ viewController: SWCardViewController)
     
-    optional func cardViewController(_ viewController: SWCardViewController, willDisplayViewController: UIViewController)
+    @objc optional func cardViewController(_ viewController: SWCardViewController, willDisplayViewController: UIViewController)
 }
 
 @objc
 public protocol SWCardViewControllerDataSource: class {
-    func cardViewController(_ viewController: SWCardViewController, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize
+    func cardViewController(_ viewController: SWCardViewController, sizeForItemAtIndexPath indexPath: IndexPath) -> CGSize
 }
 
-public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate {
+open class SWCardViewController: UIViewController, UIGestureRecognizerDelegate {
 
-    public var cardSize = CGSize(width: 300, height: 400)
-    weak public var delegate: SWCardViewControllerDelegate? = nil
-    weak public var dataSource: SWCardViewControllerDataSource? = nil
+    open var cardSize = CGSize(width: 300, height: 400)
+    weak open var delegate: SWCardViewControllerDelegate? = nil
+    weak open var dataSource: SWCardViewControllerDataSource? = nil
     
-    lazy private var collectionView: UICollectionView = {
+    lazy fileprivate var collectionView: UICollectionView = {
         // Make lazy load so any method that reference collection view won't crash
         // i.e. `setViewControllers`
         let layout = SWCardViewCollectionViewFlowLayout()
-        layout.scrollDirection = .Horizontal
+        layout.scrollDirection = .horizontal
         
         let collectionView = UICollectionView(frame: CGRect(), collectionViewLayout: layout)
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.backgroundColor = UIColor.clearColor()
+        collectionView.backgroundColor = UIColor.clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.alwaysBounceHorizontal = true
         
         collectionView.delegate = self
         collectionView.dataSource = self
         
-        let bundle = NSBundle(forClass: SWCardViewController.self)
+        let bundle = Bundle(for: SWCardViewController.self)
         let nib = UINib(nibName: "SWCardCollectionViewCell", bundle: bundle)
-        collectionView.registerNib(nib, forCellWithReuseIdentifier: cellIdentifier)
+        collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
         return collectionView
     }()
-    private var viewControllers = [UIViewController]()
-    private var panGestureRecognizer: UIPanGestureRecognizer!
-    private var tapGestureRecognizer: UITapGestureRecognizer!
+    fileprivate var viewControllers = [UIViewController]()
+    fileprivate var panGestureRecognizer: UIPanGestureRecognizer!
+    fileprivate var tapGestureRecognizer: UITapGestureRecognizer!
     
-    override public func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
 
         setup()
     }
     
-    public override func viewDidLayoutSubviews() {
+    open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         adjustInsets()
     }
     
-    private func adjustInsets() {
+    fileprivate func adjustInsets() {
         var firstCardSize = cardSize
         if let dataSource = dataSource {
-            let indexPath = NSIndexPath(forItem: 0, inSection: 0)
+            let indexPath = IndexPath(item: 0, section: 0)
             firstCardSize = dataSource.cardViewController(self, sizeForItemAtIndexPath: indexPath)
         }
         
-        var insets = UIEdgeInsetsZero
+        var insets = UIEdgeInsets.zero
         insets.top = (collectionView.bounds.size.height - firstCardSize.height) / 2
         insets.bottom = insets.top
         
@@ -107,32 +107,32 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-    private func setup() {
+    fileprivate func setup() {
         setupCollectionView()
         setupGestures()
     }
     
-    private func setupCollectionView() {
+    fileprivate func setupCollectionView() {
         // Reference to view only when view did load
         view.addSubview(collectionView)
         if #available(iOS 9.0, *) {
-            view.leftAnchor.constraintEqualToAnchor(collectionView.leftAnchor).active = true
-            view.rightAnchor.constraintEqualToAnchor(collectionView.rightAnchor).active = true
-            view.topAnchor.constraintEqualToAnchor(collectionView.topAnchor).active = true
-            view.bottomAnchor.constraintEqualToAnchor(collectionView.bottomAnchor).active = true
+            view.leftAnchor.constraint(equalTo: collectionView.leftAnchor).isActive = true
+            view.rightAnchor.constraint(equalTo: collectionView.rightAnchor).isActive = true
+            view.topAnchor.constraint(equalTo: collectionView.topAnchor).isActive = true
+            view.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor).isActive = true
         } else {
             // Fallback on earlier versions
             let views = ["collectionView": collectionView]
             
-            let hConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|collectionView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
-            let vConstraints = NSLayoutConstraint.constraintsWithVisualFormat("V:|collectionView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
+            let hConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|collectionView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
+            let vConstraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|collectionView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
             
             view.addConstraints(hConstraints)
             view.addConstraints(vConstraints)
         }
     }
     
-    private func setupGestures() {
+    fileprivate func setupGestures() {
         panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
         panGestureRecognizer.delegate = self
         
@@ -145,13 +145,13 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
         self.collectionView.addGestureRecognizer(tapGestureRecognizer)
     }
 
-    override public func didReceiveMemoryWarning() {
+    override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    public func indexForViewController(viewController: UIViewController) -> Int {
-        if let index = viewControllers.indexOf(viewController) {
+    open func indexForViewController(_ viewController: UIViewController) -> Int {
+        if let index = viewControllers.index(of: viewController) {
             return index
         }
         
@@ -163,22 +163,22 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
      
      - parameter animated: enable animation
      */
-    public func dismissViewController(viewController: UIViewController, animated: Bool) {
-        guard let index = viewControllers.indexOf(viewController) else {
+    open func dismissViewController(_ viewController: UIViewController, animated: Bool) {
+        guard let index = viewControllers.index(of: viewController) else {
             return
         }
         
-        let indexPath = NSIndexPath(forItem: index, inSection: 0)
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)
+        let indexPath = IndexPath(item: index, section: 0)
+        let cell = collectionView.cellForItem(at: indexPath)
         let remainingDistance = self.collectionView.bounds.size.height
         
-        UIView.animateWithDuration(animationDuration, animations: { 
+        UIView.animate(withDuration: animationDuration, animations: { 
             
-            cell?.transform = CGAffineTransformMakeTranslation(0, remainingDistance)
+            cell?.transform = CGAffineTransform(translationX: 0, y: remainingDistance)
             
-            }) { (finished) in
+            }, completion: { (finished) in
                 self.deleteItem(atIndexPath: indexPath)
-        }
+        }) 
 //        UIView.animateWithDuration(animationDuration, delay: 0, usingSpringWithDamping: springDamping, initialSpringVelocity: 0, options: .BeginFromCurrentState, animations: {
 //            
 //            cell?.transform = CGAffineTransformMakeTranslation(0, remainingDistance)
@@ -194,7 +194,7 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
      - parameter viewControllers: The array of custom view controllers to display in the card interface.
      - parameter animated:        if `true`, the card items for the view controllers are animated into the position. If `false`, changes are reflected immediately.
      */
-    public func setViewControllers(viewControllers: [UIViewController], animated: Bool) {
+    open func setViewControllers(_ viewControllers: [UIViewController], animated: Bool) {
         self.delegate?.cardViewController?(self, willShowViewControllers: viewControllers, animated: animated)
         self.viewControllers = viewControllers
         collectionView.reloadData()
@@ -202,26 +202,26 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
     }
     
     // MARK: - Actions
-    private var swipingCell: UICollectionViewCell? = nil
-    private var yVelocity: CGFloat = 0
-    private var swipeDirection: SwipeDirection? = nil
+    fileprivate var swipingCell: UICollectionViewCell? = nil
+    fileprivate var yVelocity: CGFloat = 0
+    fileprivate var swipeDirection: SwipeDirection? = nil
     
-    func handleTap(gestureRecognizer: UITapGestureRecognizer) {
+    func handleTap(_ gestureRecognizer: UITapGestureRecognizer) {
         delegate?.cardViewControllerDidTapDismiss?(self)
     }
     
-    func handlePan(gestureRecognizer: UIPanGestureRecognizer) {
-        let point = gestureRecognizer.locationInView(collectionView)
+    func handlePan(_ gestureRecognizer: UIPanGestureRecognizer) {
+        let point = gestureRecognizer.location(in: collectionView)
         var cell: UICollectionViewCell? = nil
-        if let indexPath = collectionView.indexPathForItemAtPoint(point) {
-            cell = collectionView.cellForItemAtIndexPath(indexPath)
+        if let indexPath = collectionView.indexPathForItem(at: point) {
+            cell = collectionView.cellForItem(at: indexPath)
         }
         
         switch gestureRecognizer.state {
-        case .Began:
+        case .began:
             swipingCell = cell
-        case .Changed:
-            let translation = gestureRecognizer.translationInView(collectionView)
+        case .changed:
+            let translation = gestureRecognizer.translation(in: collectionView)
             // added resistance
             var yTranslation = translation.y
             print("y tran \(yTranslation)")
@@ -230,18 +230,18 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
             
             print("become yy tran \(yTranslation)")
             
-            yVelocity = gestureRecognizer.velocityInView(collectionView).y
-            swipingCell?.transform = CGAffineTransformMakeTranslation(0, yTranslation)
+            yVelocity = gestureRecognizer.velocity(in: collectionView).y
+            swipingCell?.transform = CGAffineTransform(translationX: 0, y: yTranslation)
             
             print("tran \(translation.y) veloc \(yVelocity)")
-        case .Ended:
+        case .ended:
             
             let duration: CGFloat = 0.3
             
-            let translation = gestureRecognizer.translationInView(collectionView)
+            let translation = gestureRecognizer.translation(in: collectionView)
             let yDistance = translation.y
             
-            let targetVelocity = gestureRecognizer.velocityInView(collectionView).y
+            let targetVelocity = gestureRecognizer.velocity(in: collectionView).y
             
             var directionDetermine = yDistance
             if fabs(yDistance) < fabs(targetVelocity * 0.15) {
@@ -249,7 +249,7 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
             }
             
             // A value of 1 corresponds to the total animation distance traversed in one second. For example, if the total animation distance is 200 points and you want the start of the animation to match a view velocity of 100 pt/s, use a value of 0.5.
-            var initialSpringVelocity = targetVelocity / (yDistance / duration)
+            let initialSpringVelocity = targetVelocity / (yDistance / duration)
             
             let direction = SwipeDirection(yVelocity: directionDetermine)
         
@@ -257,33 +257,33 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
             
             var shouldDelete = false
             
-            UIView.animateWithDuration(animationDuration, delay: 0, usingSpringWithDamping: springDamping, initialSpringVelocity: 0, options: .BeginFromCurrentState, animations: {
+            UIView.animate(withDuration: animationDuration, delay: 0, usingSpringWithDamping: springDamping, initialSpringVelocity: 0, options: .beginFromCurrentState, animations: {
                 
                 switch direction {
-                case .Up:
+                case .up:
                     let remainingDistance = self.collectionView.bounds.size.height
                     
-                    self.swipingCell?.transform = CGAffineTransformMakeTranslation(0, -remainingDistance)
+                    self.swipingCell?.transform = CGAffineTransform(translationX: 0, y: -remainingDistance)
                     shouldDelete = true
-                case .Down:
+                case .down:
                     let remainingDistance = self.collectionView.bounds.size.height
                     
-                    self.swipingCell?.transform = CGAffineTransformMakeTranslation(0, remainingDistance)
+                    self.swipingCell?.transform = CGAffineTransform(translationX: 0, y: remainingDistance)
                     shouldDelete = true
-                case .None:
-                    self.swipingCell?.transform = CGAffineTransformIdentity
+                case .none:
+                    self.swipingCell?.transform = CGAffineTransform.identity
                 }
                 
 
                 }, completion: { (finished) in
                     if shouldDelete {
                         if let swipingCell = self.swipingCell,
-                        let indexPath = self.collectionView.indexPathForCell(swipingCell) {
+                        let indexPath = self.collectionView.indexPath(for: swipingCell) {
                             self.deleteItem(atIndexPath: indexPath)
                         }
                         
                     } else {
-                        gestureRecognizer.setTranslation(CGPointZero, inView: self.collectionView)
+                        gestureRecognizer.setTranslation(CGPoint.zero, in: self.collectionView)
                     }
             })            
         default:
@@ -291,13 +291,13 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
         }
     }
     
-    private func deleteItem(atIndexPath indexPath: NSIndexPath) {
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)
+    fileprivate func deleteItem(atIndexPath indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath)
         cell?.alpha = 0
         
         collectionView.performBatchUpdates({ [weak self] in
-            self?.viewControllers.removeAtIndex(indexPath.item)
-            self?.collectionView.deleteItemsAtIndexPaths([indexPath])
+            self?.viewControllers.remove(at: (indexPath as NSIndexPath).item)
+            self?.collectionView.deleteItems(at: [indexPath])
             }) { (finished) in
             cell?.alpha = 1
         
@@ -310,19 +310,19 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
     }
     
     // MARK: - UIGestureRecognizerDelegate
-    public func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+    open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
         if let gestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
-            let point = gestureRecognizer.locationInView(collectionView)
+            let point = gestureRecognizer.location(in: collectionView)
             guard
-                let indexPath = collectionView.indexPathForItemAtPoint(point),
-                let cell = collectionView.cellForItemAtIndexPath(indexPath)
+                let indexPath = collectionView.indexPathForItem(at: point),
+                let cell = collectionView.cellForItem(at: indexPath)
                 else {
                     // If didn't touched on cell not begin
                     return false
             }
             
-            let translation = gestureRecognizer.translationInView(collectionView)
+            let translation = gestureRecognizer.translation(in: collectionView)
             let yDirectionMovement = fabs(translation.x) < fabs(translation.y)
             
             return yDirectionMovement
@@ -330,10 +330,10 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
         }
         
         if let tapGesture = gestureRecognizer as? UITapGestureRecognizer {
-            let point = gestureRecognizer.locationInView(collectionView)
+            let point = gestureRecognizer.location(in: collectionView)
             guard
-                let indexPath = collectionView.indexPathForItemAtPoint(point),
-                let cell = collectionView.cellForItemAtIndexPath(indexPath)
+                let indexPath = collectionView.indexPathForItem(at: point),
+                let cell = collectionView.cellForItem(at: indexPath)
                 else {
                     // If didn't touched on cell not begin
                     return true
@@ -349,34 +349,34 @@ public class SWCardViewController: UIViewController, UIGestureRecognizerDelegate
 
 extension SWCardViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-    public func collectionView(collectionView: UICollectionView, willDisplayCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
-        let vc = viewControllers[indexPath.row]
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let vc = viewControllers[(indexPath as NSIndexPath).row]
         
         delegate?.cardViewController?(self, willDisplayViewController: vc)
     }
     
-    public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
-    public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewControllers.count
     }
     
-    public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! SWCardCollectionViewCell
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! SWCardCollectionViewCell
         
         print("viewController \(viewControllers)")
         print("indexPath \(indexPath)")
         
-        let vc = viewControllers[indexPath.row]
+        let vc = viewControllers[(indexPath as NSIndexPath).row]
         
         add(childViewController: vc, toCell: cell)
         
         return cell
     }
     
-    public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         if let dataSource = dataSource {
             return dataSource.cardViewController(self, sizeForItemAtIndexPath: indexPath)
@@ -391,45 +391,45 @@ extension SWCardViewController: UICollectionViewDataSource, UICollectionViewDele
 //        return rectWithInsets.size
     }
     
-    private func add(childViewController childViewController: UIViewController, toCell cell: SWCardCollectionViewCell) {
+    fileprivate func add(childViewController: UIViewController, toCell cell: SWCardCollectionViewCell) {
         
         cell.viewController = childViewController
         
         addChildViewController(childViewController)
         let childView = childViewController.view
         
-        childView.frame = cell.containerView.bounds
+        childView?.frame = cell.containerView.bounds
         
-        cell.containerView.addSubview(childView)
+        cell.containerView.addSubview(childView!)
         
         if #available(iOS 9.0, *) {
-            cell.containerView.leftAnchor.constraintEqualToAnchor(childView.leftAnchor).active = true
-            cell.containerView.rightAnchor.constraintEqualToAnchor(childView.rightAnchor).active = true
-            cell.containerView.topAnchor.constraintEqualToAnchor(childView.topAnchor).active = true
-            cell.containerView.bottomAnchor.constraintEqualToAnchor(childView.topAnchor).active = true
+            cell.containerView.leftAnchor.constraint(equalTo: (childView?.leftAnchor)!).isActive = true
+            cell.containerView.rightAnchor.constraint(equalTo: (childView?.rightAnchor)!).isActive = true
+            cell.containerView.topAnchor.constraint(equalTo: (childView?.topAnchor)!).isActive = true
+            cell.containerView.bottomAnchor.constraint(equalTo: (childView?.topAnchor)!).isActive = true
         } else {
             let views = ["childView": childView]
             
-            let hConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|childView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
-            let vConstraints = NSLayoutConstraint.constraintsWithVisualFormat("V:|childView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
+            let hConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|childView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
+            let vConstraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|childView|", options: NSLayoutFormatOptions(), metrics: nil, views: views)
             
             cell.containerView.addConstraints(hConstraints)
             cell.containerView.addConstraints(vConstraints)
         }
         
-        childViewController.didMoveToParentViewController(self)
+        childViewController.didMove(toParentViewController: self)
     }
     
-    private func remove(childViewController childViewController: UIViewController, fromCell cell: SWCardCollectionViewCell) {
-        childViewController.willMoveToParentViewController(nil)
+    fileprivate func remove(childViewController: UIViewController, fromCell cell: SWCardCollectionViewCell) {
+        childViewController.willMove(toParentViewController: nil)
         let childView = childViewController.view
-        childView.removeFromSuperview()
+        childView?.removeFromSuperview()
         childViewController.removeFromParentViewController()
     }
     
     
     
-    public func collectionView(collectionView: UICollectionView, didEndDisplayingCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard
             let cell = cell as? SWCardCollectionViewCell,
             let oldViewController = cell.viewController else {
@@ -439,7 +439,7 @@ extension SWCardViewController: UICollectionViewDataSource, UICollectionViewDele
         remove(childViewController: oldViewController, fromCell: cell)
     }
     
-    public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAtIndex section: Int) -> CGFloat {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         
         return (collectionView.contentInset.left) / 2 // half the inset, so we can see the edge
     }
@@ -447,7 +447,7 @@ extension SWCardViewController: UICollectionViewDataSource, UICollectionViewDele
 
 extension UIViewController {
     public var cardViewController: SWCardViewController? {
-        if let parentViewController = parentViewController as? SWCardViewController {
+        if let parentViewController = parent as? SWCardViewController {
             return parentViewController
         }
         
