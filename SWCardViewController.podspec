@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
 #   * Write the description between the DESC delimiters below.
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
-  s.description      = <<-DESC
-A card layout with swipe-up/down to dismiss integrated.
-                       DESC
+#  s.description      = <<-DESC
+#A card layout with swipe-up/down to dismiss integrated.
+#                       DESC
 
   s.homepage         = 'https://github.com/sarunw/SWCardViewController'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
