@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SWCardViewController'
-  s.version          = '0.3.0'
+  s.version          = '0.3.1'
   s.summary          = 'A card layout with swipe-up/down to dismiss integrated.'
 
 # This description is used to generate tags and improve search results.
