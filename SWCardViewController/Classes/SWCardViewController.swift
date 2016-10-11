@@ -57,6 +57,10 @@ open class SWCardViewController: UIViewController, UIGestureRecognizerDelegate {
         layout.scrollDirection = .horizontal
         
         let collectionView = UICollectionView(frame: CGRect(), collectionViewLayout: layout)
+        if #available(iOS 10.0, *) {
+            // TODO: find the cause of ghost view and reenable this
+            collectionView.isPrefetchingEnabled = false
+        }
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.backgroundColor = UIColor.clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
